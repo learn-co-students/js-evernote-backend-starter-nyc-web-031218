@@ -66,7 +66,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
   }).then(response => response.json())
   .then(data => getNotes())
   }
-  
+
   fetch("http://localhost:3000/api/v1/notes")
   .then(response => response.json())
   .then(data => {
