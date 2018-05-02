@@ -2,36 +2,40 @@ document.addEventListener("DOMContentLoaded", function(event) {
 
 
   Note.prototype.template = function() {
-    let template = document.createElement("div")
-    template.innerHTML = `<h3>Title: "${this.title}"</h3><p>Body:<br/> ${this.body.slice(0, 40)}</p>`
+    let template = document.createElement("ul")
+    template.innerHTML = `<li class="preview">${this.body.slice(0, 40)}...</li>`
     return template;
   }
+
   let preview = document.getElementById('preview')
 
   function showNotes(note) {
-    preview.append(note.template())
+    let noteP = note.template()
+    preview.append(noteP)
+    noteP.addEventListener('click', function(){showFullView(note)})
   }
 
   Note.prototype.full_template = function() {
-    let full_template = `<p>Title: "${this.title}"</p><p>Body: ${this.body}</p>`
-    return full_template;
+    return `<h2>Title: "${this.title}"</h2><p><strong>Body:</strong> ${this.body}</p>`
   }
-  let full_view = document.getElementById('full_view')
 
+  let fullView = document.getElementById('full_view')
   function showFullView(note) {
-    full_view.append(note.full_template())
+    fullView.innerHTML = note.full_template()
     let editButton = document.createElement("button");
+    editButton.id = `edit-button-${note.id}`
     editButton.innerText = "Rewrite!"
-    full_view.append(editButton)
-    deleteButton.innerText = "Dissapear!"
-    full_view.append(deleteButton)
-  }
+    fullView.append(editButton)
+    let deleteButton = document.createElement("button");
+    deleteButton.id = `delete-button-${note.id}`
+    deleteButton.innerText = "Disappear!"
+    fullView.append(deleteButton)
 
-  function getNotes(data) {
-    fetch("http://localhost:3000/api/v1/notes")
-    .then(data => {
-      for (let i = 0; i > data.length; i++){
-        showNotes(new Note(data[i]));
+    fullView.addEventListener('click', function(event){
+      if(event.target.id === `delete-button-${note.id}` ){
+        deleteNote(note)
+      } else if (event.target.id === `edit-button-${note.id}`) {
+        editNoteForm(note, fullView)
       }
     })
   }
@@ -56,15 +60,46 @@ document.addEventListener("DOMContentLoaded", function(event) {
   .then(data => showNotes(new Note(data)))
   }
 
-  function editNotes(inputData) {
-    fetch("http://localhost:3000/api/v1/notes/:id",{
+  function editNoteForm(note, div){
+    div.innerHTML = `
+    <h2>Title:</h2>
+    <input type="text" id="edit-title" value="${note.title}">
+    <p>Body:</p>
+    <input type="text" id="edit-body" value="${note.body}">
+    `
+    let editButton = document.createElement("button");
+    editButton.id = `submit-edit-button-${note.id}`
+    editButton.innerText = "Submit!"
+
+    div.appendChild(editButton)
+
+    editButton.addEventListener('click', function(){
+      note.title = document.getElementById('edit-title').value
+      note.body = document.getElementById('edit-body').value
+      editNote(note)
+    })
+  }
+
+  function editNote(inputData) {
+    fetch(`http://localhost:3000/api/v1/notes/${inputData.id}`,{
       method: 'PATCH',
       headers: {
         "Content-Type": "application/json"
       },
       body: JSON.stringify(inputData)
   }).then(response => response.json())
-  .then(data => getNotes())
+  .then(data => location.reload())
+  }
+
+  function deleteNote(inputData){
+    console.log(inputData)
+    return fetch(`http://localhost:3000/api/v1/notes/${inputData.id}`,{
+      method: 'DELETE',
+      headers: {
+        "Content-Type": "application/json"
+      }
+    })
+  .then(response => location.reload())
   }
 
   fetch("http://localhost:3000/api/v1/notes")
@@ -74,7 +109,5 @@ document.addEventListener("DOMContentLoaded", function(event) {
       showNotes(new Note(i));
     }
   })
-
-
 
 });
