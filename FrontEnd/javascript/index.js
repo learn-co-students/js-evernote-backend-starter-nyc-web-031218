@@ -11,7 +11,7 @@ let newNoteForm = document.getElementById('newForm')
 
 
 // Listing all of a user's notes on a sidebar --> For now, only create one user. There will be no log in.
-fetch('http://localhost:3000/api/v1/notes')
+fetch('http://localhost:3100/api/v1/notes')
   .then((res) => res.json())
   .then((json) => {
     let noteTitles = json.map((note)=>note.title)
@@ -49,7 +49,7 @@ newNoteButton.addEventListener('click',(e)=>{
       body: noteBodyInput.value
     }
 
-    fetch('http://localhost:3000/api/v1/notes', {
+    fetch('http://localhost:3100/api/v1/notes', {
         method: 'POST',
           body: JSON.stringify(postData),
           headers: {
@@ -131,7 +131,7 @@ function handleNote(note){
 function deleteNote(title, body,
   deleteButton, editButton, id) {
   // debugger
-  fetch('http://localhost:3000/api/v1/notes/' + id, {
+  fetch('http://localhost:3100/api/v1/notes/' + id, {
       method: 'DELETE',
         headers: {
           'Content-Type': 'application/json'
@@ -174,7 +174,7 @@ function editNote(id){
     previousBody.remove()
 
 
-    fetch('http://localhost:3000/api/v1/notes/' + id, {
+    fetch('http://localhost:3100/api/v1/notes/' + id, {
         method: 'PATCH',
           body: JSON.stringify(postData),
           headers: {
